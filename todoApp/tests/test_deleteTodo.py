@@ -1,12 +1,51 @@
-import requests
+from fastapi.testclient import TestClient
+from sqlmodel import Session, SQLModel, create_engine
+from httpx._transports.wsgi import WSGITransport
+from app.main import app, get_session, Todo
+from app import settings
 
 
-def test_deleteTodo():
-  url = "http://127.0.0.1:8000/todos/10"
-  response = requests.delete(url)
-  assert response.status_code == 200
 
-def test_deleteTodo2():
-  url = "http://127.0.0.1:8000/todos/11"
-  response = requests.delete(url)
-  assert response.status_code == 200
+# Test with id available in db 
+connection_string = str(settings.TEST_DB_URL).replace(
+"postgresql", "postgresql+psycopg")
+
+engine = create_engine(
+    connection_string)
+
+SQLModel.metadata.create_all(engine)  
+
+with Session(engine) as session:  
+
+    def get_session_override():  
+            return session  
+
+    app.dependency_overrides[get_session] = get_session_override 
+
+    client = TestClient(app=app)
+
+def test_delete_todo():
+        todo_id = 34
+        response = client.delete(f"/todos/{todo_id}")
+
+        data = response.json()
+
+        assert response.status_code == 200
+        assert data["message"] == "Todo deleted"
+
+
+# Test with id not available in db
+def test_delete_todo_id_not_found():
+        todo_id = 1
+        response = client.delete(f"/todos/{todo_id}")
+
+        data = response.json()
+
+        assert response.status_code == 200
+        assert data["message"] == f"Todo with id {todo_id} not found"
+
+      
+
+  
+
+

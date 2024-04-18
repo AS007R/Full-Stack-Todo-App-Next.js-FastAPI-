@@ -62,6 +62,13 @@ async def get_todos(session: Annotated[Session, Depends(get_session)]):
   todos = session.exec(select(Todo)).all()
   return todos
 
+#get todo by id
+@app.get("/todos/{todo_id}")
+async def get_todo(todo_id: int, session: Annotated[Session, Depends(get_session)]):
+  todo = session.get(Todo, todo_id)
+  if not todo:
+    raise HTTPException(status_code=404, detail=f"Todo with id {todo_id} not found")
+  return todo
 
 # define route to create todo
 @app.post("/todos")
@@ -89,7 +96,7 @@ async def delete_todo(todo_id: int, session: Annotated[Session, Depends(get_sess
 # define route to update todo by id 
 @app.put("/todos/{todo_id}")
 async def update_todo(todo_id: int, todo: Todo, session: Annotated[Session, Depends(get_session)]):
-  todo_to_update = session.get(Todo, todo_id)
+  todo_to_update = session.get(Todo, todo_id) 
   if not todo_to_update:
     return {"message": f"Todo with id {todo_id} not found"}
  

@@ -17,7 +17,6 @@ export default function Home() {
     const query = fetch(`http://localhost:8000/todos/${id}`, {
       method: "DELETE",
     })
-    console.log(query);
   };
 
   useEffect(() => {
