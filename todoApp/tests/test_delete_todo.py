@@ -25,7 +25,7 @@ with Session(engine) as session:
     client = TestClient(app=app)
 
 def test_delete_todo():
-        todo_id = 34
+        todo_id = 111
         response = client.delete(f"/todos/{todo_id}")
 
         data = response.json()
@@ -41,11 +41,11 @@ def test_delete_todo_id_not_found():
 
         data = response.json()
 
-        assert response.status_code == 200
-        assert data["message"] == f"Todo with id {todo_id} not found"
+        assert response.status_code == 404
+        assert data["detail"] == f"Todo with id {todo_id} not found."
 
       
 
   
 
-
+ 

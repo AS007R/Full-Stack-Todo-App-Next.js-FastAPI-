@@ -6,6 +6,7 @@ from app import settings
 
 
 
+
 connection_string = str(settings.TEST_DB_URL).replace(
 "postgresql", "postgresql+psycopg")
 
@@ -22,36 +23,32 @@ with Session(engine) as session:
     app.dependency_overrides[get_session] = get_session_override 
 
     client = TestClient(app=app)
+def test_update_todo():
 
-def test_add_todo():
+    todo_id = 4
+    todo_content = "Updated todo content"
 
+    response = client.put(f"/todos/{todo_id}",
+        json={"title": todo_content}
+    )
 
-        response = client.post("/todos/",
-            json={
-                 "id": 34,
-                 "title": "test todo title"}
-        )
-
-        data = response.json()
-
-        assert response.status_code == 200
-        assert data["title"] == "test todo title"
-        assert data["id"] == 34
+    assert response.status_code == 200
 
 
-# def test_add_todo1():
 
+def test_update_todo_not_found():
+    todo_id = 1
+    todo_content = "My test todo"
 
-#         response = client.post("/todos/",
-#             json={
-#                  "id": 33,
-#                  "title": "test todo title",}
-#         )
+    response = client.put(f"/todos/{todo_id}",
+        json={"title": todo_content}
+    )
 
-#         data = response.json()
+    data = response.json()
 
-#         assert response.status_code == 422
-        
+    assert response.status_code == 404
+    assert data["detail"] == f"Todo with id {todo_id} not found"
+
   
 
 

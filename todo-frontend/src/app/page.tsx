@@ -11,6 +11,7 @@ type TodoType = {
 
 export default function Home() {
   const [allTodo, setAllTodo] = useState<TodoType[]>([]);
+  let todoFind:boolean = true
   // getting all todoes from an api
 
   const deleteTodo = (id: number) => {
@@ -21,10 +22,16 @@ export default function Home() {
 
   useEffect(() => {
     const getData = async () => {
-      const res = await fetch("http://localhost:8000/todos");
-      const data: TodoType[] = await res.json();
+      try {
+        const res = await fetch("http://localhost:8000/todos");
+        const data: TodoType[] = await res.json();
 
-      setAllTodo(data);
+        setAllTodo(data);
+        
+      } catch (error) {
+        throw new Error(`HTTP error! Status: ${error}`)
+        todoFind = false
+      }
     };
 
     getData();
@@ -67,7 +74,11 @@ export default function Home() {
           <AddTodoForm onAdd={onAdd} />
         </div>
         <div className="mt-4 h-[70%] overflow-y-auto">
-          {allTodo.map((todo) => (
+    
+          
+        {allTodo.length == 0? <h1 className="scroll-m-20 text-2xl text-red-500 font-extrabold tracking-wide ">
+          Nothing to do today!
+        </h1>: allTodo.map((todo) => (
             <Todo
               key={todo.id}
               id = {todo.id}
